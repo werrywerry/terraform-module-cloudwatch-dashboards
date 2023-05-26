@@ -138,7 +138,7 @@ locals {
         "x" : 0,
         "type" : "text",
         "properties" : {
-          "markdown" : "# RDS Metrics\n\n* Total IOPS Usage (Alarms at 80% max)\n* Free Storage Space (Alarms at 10%)\n* Swap Usage (Alarms at 1MB)\n* Freeable Memory (Alarms at 20%)\n* CPU Utilization (Alarms at 80%)\n"
+          "markdown" : format("# RDS Metrics\n\n## %s\n\n* Total IOPS Usage (Alarms at 80% max)\n* Free Storage Space (Alarms at 10%)\n* Freeable Memory (Alarms at 20%)\n* CPU Utilization (Alarms at 80%)\n* DiskQueueDepth\n", rds)
         }
       },
       {
@@ -466,7 +466,7 @@ locals {
   widgets                = concat(local.api_rds_dynamo_widgets, local.lambda_widgets)
 }
 resource "aws_cloudwatch_dashboard" "main" {
-  dashboard_name = var.dashboard_name
+  dashboard_name = format("%s-%s-PerformanceDashboard", var.service_name, var.env)
 
   dashboard_body = jsonencode(
     {
