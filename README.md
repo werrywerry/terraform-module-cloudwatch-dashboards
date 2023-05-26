@@ -1,4 +1,4 @@
-## Module: Lambda Layer Module prebuilt to automate the deployment of AWS dashboards
+## Module: Terraform Module prebuilt to automate the deployment of AWS dashboards
 
 ### Requirements
 - Terraform version: 0.13.+
