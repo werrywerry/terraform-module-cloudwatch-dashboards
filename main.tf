@@ -413,7 +413,7 @@ locals {
       "x" : 0,
       "type" : "text",
       "properties" : {
-        "markdown" : format("# Lambda Metrics\n\n* Duration\n* ConcurrentExecutions\n\n[View detailed lambda dashboard](%s)", local.lambda_dashboard_url)
+        "markdown" : "# Lambda Metrics\n\n* Duration\n* ConcurrentExecutions\n\n[View detailed lambda dashboard](https://ap-southeast-2.console.aws.amazon.com/cloudwatch/home?region=ap-southeast-2#dashboards:name=StaffServiceTest-Dev-LambdaDashboard)"
       }
     },
     {
