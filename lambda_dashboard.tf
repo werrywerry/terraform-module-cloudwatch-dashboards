@@ -94,9 +94,12 @@ locals {
       }
     ]
   ])
+  lambda_dashboard_url = format("https://ap-southeast-2.console.aws.amazon.com/cloudwatch/home?region=ap-southeast-2#dashboards:name=%s-%s-LambdaDashboard)", format("# Lambda Metrics\n\n* Duration\n* ConcurrentExecutions\n\n[View detailed lambda dashboard](https://ap-southeast-2.console.aws.amazon.com/cloudwatch/home?region=ap-southeast-2#dashboards:name=%s-%s-LambdaDashboard)", local.service_name, local.env))
 }
 
 resource "aws_cloudwatch_dashboard" "lambda" {
+  count = length(local.lambda_detail_widgets) > 0 ? 1 : 0
+
   dashboard_name = format("%s-%s-LambdaDashboard", var.service_name, var.env)
 
   dashboard_body = jsonencode({
