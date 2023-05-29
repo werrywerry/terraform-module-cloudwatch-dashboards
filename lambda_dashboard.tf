@@ -4,9 +4,8 @@ provider "aws" {
 
 locals {
   widget_height = 8
-  lambda_list = sort([for item in var.resource_list : keys(item)[0] if values(item)[0] == "lambda"])
 
-  widgets = flatten([
+  lambda_detail_widgets = flatten([
     for idx, lambda_name in local.lambda_list : [
       {
         "height": 2,
@@ -104,6 +103,6 @@ resource "aws_cloudwatch_dashboard" "lambda" {
   dashboard_name = format("%s-%s-LambdaDashboard", var.service_name, var.env)
 
   dashboard_body = jsonencode({
-    "widgets": local.widgets
+    "widgets": local.lambda_detail_widgets
   })
 }
