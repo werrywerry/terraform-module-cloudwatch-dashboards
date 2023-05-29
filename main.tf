@@ -465,7 +465,7 @@ locals {
   api_rds_dynamo_widgets = concat(local.api_rds_widgets, local.dynamo_widgets)
   widgets                = concat(local.api_rds_dynamo_widgets, local.lambda_widgets)
 }
-resource "aws_cloudwatch_dashboard" "main" {
+resource "aws_cloudwatch_dashboard" "performance" {
   dashboard_name = format("%s-%s-PerformanceDashboard", var.service_name, var.env)
 
   dashboard_body = jsonencode(
