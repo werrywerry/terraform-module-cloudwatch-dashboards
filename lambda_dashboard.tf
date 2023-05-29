@@ -1,6 +1,3 @@
-provider "aws" {
-  region = "ap-southeast-2"
-}
 
 locals {
   widget_height = 8
