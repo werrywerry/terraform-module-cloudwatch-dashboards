@@ -18,6 +18,6 @@ resource "aws_cloudwatch_dashboard" "lambda" {
   dashboard_name = format("%s-%s-LambdaDashboard", var.service_name, var.env)
 
   dashboard_body = jsonencode({
-    "widgets": local.lambda_detail_widgets
+    "widgets" : local.lambda_detail_widgets
   })
 }

@@ -1,19 +1,22 @@
 locals {
-  api_list    = sort([for item in var.resource_list : keys(item)[0] if values(item)[0] == "api"])
-  dynamo_list = sort([for item in var.resource_list : keys(item)[0] if values(item)[0] == "dynamo_db"])
-  rds_list    = sort([for item in var.resource_list : keys(item)[0] if values(item)[0] == "rds"])
+  api_list    = [for api in var.resource_list["apis"] : api]
+  dynamo_list = [for dynamo in var.resource_list["dynamos"] : dynamo]
+  rds_list    = [for rds in var.resource_list["rdss"] : rds]
 
   lambda_duration_metrics = [
-    for fn in local.lambda_list :
-    ["AWS/Lambda", "Duration", "FunctionName", fn, { "region" : "ap-southeast-2" }]
+    for lambda_obj in local.lambda_list : [
+      "AWS/Lambda", "Duration", "FunctionName", lambda_obj.lambda, { "region" : "ap-southeast-2" }
+    ]
   ]
   lambda_concurrent_execution_metrics = [
-    for fn in local.lambda_list :
-    ["AWS/Lambda", "ConcurrentExecutions", "FunctionName", fn, { "region" : "ap-southeast-2" }]
+    for lambda_obj in local.lambda_list : [
+      "AWS/Lambda", "ConcurrentExecutions", "FunctionName", lambda_obj.lambda, { "region" : "ap-southeast-2" }
+    ]
   ]
 
   api_widgets = flatten([
     for idx, api in local.api_list : [
+      # API text widget
       {
         "height" : 3,
         "width" : 6,
@@ -21,9 +24,10 @@ locals {
         "x" : 0,
         "type" : "text",
         "properties" : {
-          "markdown" : format("# API Metrics\n\n## %s", api)
+          "markdown" : format("# API Metrics\n\n## %s", api.api)
         }
       },
+      # API 4xx and 5xx widget
       {
         "height" : 6,
         "width" : 5,
@@ -36,7 +40,7 @@ locals {
               "AWS/ApiGateway",
               "4XXError",
               "ApiName",
-              api,
+              api.api,
               {
                 "region" : "ap-southeast-2"
               }
@@ -57,6 +61,7 @@ locals {
           "stat" : "Sum"
         }
       },
+      # API Latency and Integration Latency widget
       {
         "height" : 6,
         "width" : 13,
@@ -64,43 +69,19 @@ locals {
         "x" : 11,
         "type" : "metric",
         "properties" : {
-          "metrics" : [
-            [
-              "AWS/ApiGateway",
-              "Latency",
-              "ApiName",
-              api,
-              {
-                "id" : "m1",
-                "region" : "ap-southeast-2"
-              }
-            ],
-            [
-              ".",
-              "IntegrationLatency",
-              ".",
-              ".",
-              {
-                "id" : "m2",
-                "region" : "ap-southeast-2"
-              }
+          "annotations" : {
+            "alarms" : [
+              for alarm in api.alarms :
+              alarm["latency_alarm_arn"] if contains(keys(alarm), "latency_alarm_arn")
             ]
-          ],
+          }
           "view" : "timeSeries",
-          "stacked" : false,
           "region" : "ap-southeast-2",
           "period" : 300,
-          "stat" : "Maximum",
-          "yAxis" : {
-            "left" : {
-              "min" : 0
-            },
-            "right" : {
-              "min" : 0
-            }
-          }
+          "stat" : "Sum"
         }
       },
+      # API hit count widget
       {
         "height" : 3,
         "width" : 6,
@@ -114,7 +95,7 @@ locals {
               "AWS/ApiGateway",
               "Count",
               "ApiName",
-              api
+              api.api
             ]
           ],
           "region" : "ap-southeast-2"
@@ -133,7 +114,7 @@ locals {
         "x" : 0,
         "type" : "text",
         "properties" : {
-          "markdown" : format("# RDS Metrics\n\n## %s\n\n* Total IOPS Usage (Alarms at 80%% max)\n* Free Storage Space (Alarms at 10%%)\n* Freeable Memory (Alarms at 20%%)\n* CPU Utilization (Alarms at 80%%)\n* DiskQueueDepth\n", rds)
+          "markdown" : format("# RDS Metrics\n\n## %s\n\n* Total IOPS Usage (Alarms at 80%% max)\n* Free Storage Space (Alarms at 10%%)\n* Freeable Memory (Alarms at 20%%)\n* CPU Utilization (Alarms at 80%%)\n* DiskQueueDepth\n", rds.rds)
         }
       },
       {
@@ -146,9 +127,10 @@ locals {
           "title" : "TotalIOPS",
           "annotations" : {
             "alarms" : [
-              "arn:aws:cloudwatch:ap-southeast-2:318468042250:alarm:staff-service-datastore-IOPS"
+              for alarm in rds.alarms :
+              alarm["iops_alarm_arn"] if contains(keys(alarm), "iops_alarm_arn")
             ]
-          },
+          }
           "view" : "timeSeries",
           "stacked" : false,
           "type" : "chart"
@@ -164,9 +146,10 @@ locals {
           "title" : "CPUUtilization",
           "annotations" : {
             "alarms" : [
-              "arn:aws:cloudwatch:ap-southeast-2:318468042250:alarm:staff-service-datastore-CPUUtilization"
+              for alarm in rds.alarms :
+              alarm["cpu_alarm_arn"] if contains(keys(alarm), "cpu_alarm_arn")
             ]
-          },
+          }
           "view" : "timeSeries",
           "stacked" : false,
           "type" : "chart"
@@ -179,44 +162,16 @@ locals {
         "x" : 0,
         "type" : "metric",
         "properties" : {
-          "metrics" : [
-            [
-              {
-                "expression" : "m1*1000",
-                "label" : "ReadLatency",
-                "id" : "e1",
-                "region" : "ap-southeast-2"
-              }
-            ],
-            [
-              "AWS/RDS",
-              "ReadLatency",
-              "DBInstanceIdentifier",
-              "staff-service-datastore",
-              {
-                "region" : "ap-southeast-2",
-                "label" : "m1",
-                "id" : "m1",
-                "visible" : false
-              }
+          "title" : "ReadLatency",
+          "annotations" : {
+            "alarms" : [
+              for alarm in rds.alarms :
+              alarm["read_alarm_arn"] if contains(keys(alarm), "read_alarm_arn")
             ]
-          ],
+          }
           "view" : "timeSeries",
           "stacked" : false,
-          "region" : "ap-southeast-2",
-          "period" : 300,
-          "yAxis" : {
-            "left" : {
-              "min" : 0,
-              "label" : "Milliseconds",
-              "showUnits" : false
-            },
-            "right" : {
-              "min" : 0
-            }
-          },
-          "stat" : "Average",
-          "title" : "ReadLatency"
+          "type" : "chart"
         }
       },
       {
@@ -226,44 +181,16 @@ locals {
         "x" : 12,
         "type" : "metric",
         "properties" : {
-          "metrics" : [
-            [
-              {
-                "expression" : "m1*1000",
-                "label" : "WriteLatency",
-                "id" : "e1",
-                "region" : "ap-southeast-2"
-              }
-            ],
-            [
-              "AWS/RDS",
-              "WriteLatency",
-              "DBInstanceIdentifier",
-              "staff-service-datastore",
-              {
-                "region" : "ap-southeast-2",
-                "label" : "m1",
-                "id" : "m1",
-                "visible" : false
-              }
+          "title" : "WriteLatency",
+          "annotations" : {
+            "alarms" : [
+              for alarm in rds.alarms :
+              alarm["write_alarm_arn"] if contains(keys(alarm), "write_alarm_arn")
             ]
-          ],
+          }
           "view" : "timeSeries",
           "stacked" : false,
-          "region" : "ap-southeast-2",
-          "period" : 300,
-          "yAxis" : {
-            "left" : {
-              "min" : 0,
-              "showUnits" : false,
-              "label" : "Milliseconds"
-            },
-            "right" : {
-              "min" : 0
-            }
-          },
-          "stat" : "Average",
-          "title" : "WriteLatency"
+          "type" : "chart"
         }
       },
       {
@@ -276,9 +203,10 @@ locals {
           "title" : "FreeableMemory",
           "annotations" : {
             "alarms" : [
-              "arn:aws:cloudwatch:ap-southeast-2:318468042250:alarm:staff-service-datastore-FreeableMemory"
+              for alarm in rds.alarms :
+              alarm["memory_alarm_arn"] if contains(keys(alarm), "memory_alarm_arn")
             ]
-          },
+          }
           "view" : "timeSeries",
           "stacked" : false,
           "type" : "chart"
@@ -294,9 +222,10 @@ locals {
           "title" : "FreeStorageSpace",
           "annotations" : {
             "alarms" : [
-              "arn:aws:cloudwatch:ap-southeast-2:318468042250:alarm:staff-service-datastore-FreeStorageSpace"
+              for alarm in rds.alarms :
+              alarm["storage_alarm_arn"] if contains(keys(alarm), "storage_alarm_arn")
             ]
-          },
+          }
           "view" : "timeSeries",
           "stacked" : false,
           "type" : "chart"
@@ -314,7 +243,7 @@ locals {
               "AWS/RDS",
               "DiskQueueDepth",
               "DBInstanceIdentifier",
-              "staff-service-datastore",
+              rds.rds,
               {
                 "region" : "ap-southeast-2"
               }
@@ -342,6 +271,16 @@ locals {
   dynamo_widgets = flatten([
     for idx, dynamo in local.dynamo_list : [
       {
+        "type" : "text",
+        "x" : 0,
+        "y" : local.dynamo_y_coord,
+        "width" : 6,
+        "height" : 6,
+        "properties" : {
+          "markdown" : format("# DynamoDB\n## %s\n* SuccessfulRequestLatency\n* ConsumedReadCapacityUnits\n* ConsumedWriteCapcityUntis", dynamo.dynamo)
+        }
+      },
+      {
         "type" : "metric",
         "x" : 6,
         "y" : local.dynamo_y_coord,
@@ -351,19 +290,9 @@ locals {
           "view" : "timeSeries",
           "stacked" : false,
           "metrics" : [
-            ["AWS/DynamoDB", "SuccessfulRequestLatency", "TableName", "PayloadService-PayloadsStore-dev-DynamoDB", "Operation", "Query"]
+            ["AWS/DynamoDB", "SuccessfulRequestLatency", "TableName", dynamo.dynamo, "Operation", "Query"]
           ],
           "region" : "ap-southeast-2"
-        }
-      },
-      {
-        "type" : "text",
-        "x" : 0,
-        "y" : local.dynamo_y_coord,
-        "width" : 6,
-        "height" : 6,
-        "properties" : {
-          "markdown" : "# DynamoDB\n## PayloadService-PayloadsStore-dev-DynamoDB\n* SuccessfulRequestLatency\n* ConsumedReadCapacityUnits\n* ConsumedWriteCapcityUntis"
         }
       },
       {
@@ -373,11 +302,15 @@ locals {
         "width" : 6,
         "height" : 6,
         "properties" : {
+          "title" : "ReadLatency"
           "view" : "timeSeries",
           "stacked" : false,
-          "metrics" : [
-            ["AWS/DynamoDB", "ConsumedReadCapacityUnits", "TableName", "PayloadService-PayloadsStore-dev-DynamoDB"]
-          ],
+          "annotations" : {
+            "alarms" : [
+              for alarm in dynamo.alarms :
+              alarm["read_alarm_arn"] if contains(keys(alarm), "read_alarm_arn")
+            ],
+          }
           "region" : "ap-southeast-2"
         }
       },
@@ -390,9 +323,13 @@ locals {
         "properties" : {
           "view" : "timeSeries",
           "stacked" : false,
-          "metrics" : [
-            ["AWS/DynamoDB", "ConsumedWriteCapacityUnits", "TableName", "PayloadService-PayloadsStore-dev-DynamoDB"]
-          ],
+          "title" : "WriteLatency"
+          "annotations" : {
+            "alarms" : [
+              for alarm in dynamo.alarms :
+              alarm["write_alarm_arn"] if contains(keys(alarm), "write_alarm_arn")
+            ],
+          }
           "region" : "ap-southeast-2"
         }
       }
