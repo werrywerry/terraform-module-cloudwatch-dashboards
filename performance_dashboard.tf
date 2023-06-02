@@ -335,6 +335,8 @@ locals {
       }
     ]
   ])
+
+  lambda_y_coord = local.dynamo_y_coord + length(local.dynamo_list) * 6
   lambda_widgets_text = length(local.lambda_list) > 0 ? [
     {
       "height" : 6,
