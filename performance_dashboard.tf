@@ -335,9 +335,7 @@ locals {
       }
     ]
   ])
-
-  lambda_y_coord = local.dynamo_y_coord + length(local.dynamo_list) * 6
-  lambda_widgets = length(local.lambda_list) > 0 ? [
+  lambda_widgets_text = length(local.lambda_list) > 0 ? [
     {
       "height" : 6,
       "width" : 6,
@@ -347,7 +345,10 @@ locals {
       "properties" : {
         "markdown" : format("# Lambda Metrics\n\n* Duration\n* ConcurrentExecutions\n\n[View detailed lambda dashboard](%s)", local.lambda_dashboard_url)
       }
-    },
+    }
+  ] : []
+
+  lambda_widgets_metric_1 = length(local.lambda_list) > 0 ? [
     {
       "height" : 6,
       "width" : 9,
@@ -368,7 +369,10 @@ locals {
           }
         }
       }
-    },
+    }
+  ] : []
+
+  lambda_widgets_metric_2 = length(local.lambda_list) > 0 ? [
     {
       "height" : 6,
       "width" : 9,
@@ -392,8 +396,17 @@ locals {
       }
     }
   ] : []
-  
-  api_rds_widgets        = concat(local.api_widgets, local.rds_widgets)
-  api_rds_dynamo_widgets = concat(local.api_rds_widgets, local.dynamo_widgets)
-  performance_widgets    = concat(local.api_rds_dynamo_widgets, local.lambda_widgets)
+
+  lambda_widgets = concat(
+    lambda_widgets_text,
+    lambda_widgets_metric_1,
+    lambda_widgets_metric_2
+  )
+
+performance_widgets = concat(
+  local.api_widgets, 
+  local.rds_widgets, 
+  local.dynamo_widgets, 
+  local.lambda_widgets
+  )
 }
