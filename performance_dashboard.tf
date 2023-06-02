@@ -400,9 +400,9 @@ locals {
   ] : []
 
   lambda_widgets = concat(
-    lambda_widgets_text,
-    lambda_widgets_metric_1,
-    lambda_widgets_metric_2
+    local.lambda_widgets_text,
+    local.lambda_widgets_metric_1,
+    local.lambda_widgets_metric_2
   )
 
 performance_widgets = concat(
