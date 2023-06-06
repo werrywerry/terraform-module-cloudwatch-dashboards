@@ -106,6 +106,7 @@ locals {
 
   rds_y_coord = length(local.api_list) * 6
   rds_widgets = flatten([
+    # API text widget
     for idx, rds in local.rds_list : [
       {
         "height" : 6,
@@ -117,6 +118,7 @@ locals {
           "markdown" : format("# RDS Metrics\n\n## %s\n\n* Total IOPS Usage (Alarms at 80%% max)\n* Free Storage Space (Alarms at 10%%)\n* Freeable Memory (Alarms at 20%%)\n* CPU Utilization (Alarms at 80%%)\n* DiskQueueDepth\n", rds.rds)
         }
       },
+      # API IOPS widget
       {
         "height" : 6,
         "width" : 9,
@@ -136,6 +138,7 @@ locals {
           "type" : "chart"
         }
       },
+    # RDS CPU widget
       {
         "height" : 6,
         "width" : 9,
@@ -155,6 +158,7 @@ locals {
           "type" : "chart"
         }
       },
+    # RDS Read Latency widget
       {
         "height" : 6,
         "width" : 12,
@@ -174,6 +178,7 @@ locals {
           "type" : "chart"
         }
       },
+    # RDS Write Latency widget
       {
         "height" : 6,
         "width" : 12,
@@ -193,6 +198,7 @@ locals {
           "type" : "chart"
         }
       },
+    # RDS Memory widget
       {
         "height" : 6,
         "width" : 8,
@@ -212,6 +218,7 @@ locals {
           "type" : "chart"
         }
       },
+    # RDS Storage widget
       {
         "height" : 6,
         "width" : 8,
@@ -231,6 +238,7 @@ locals {
           "type" : "chart"
         }
       },
+    # RDS Disk Queue widget
       {
         "height" : 6,
         "width" : 8,
@@ -270,6 +278,7 @@ locals {
   dynamo_y_coord = local.rds_y_coord + length(local.rds_list) * 18
   dynamo_widgets = flatten([
     for idx, dynamo in local.dynamo_list : [
+    # Dynamo Text widget
       {
         "type" : "text",
         "x" : 0,
@@ -280,6 +289,7 @@ locals {
           "markdown" : format("# DynamoDB\n## %s\n* SuccessfulRequestLatency\n* ConsumedReadCapacityUnits\n* ConsumedWriteCapcityUntis", dynamo.dynamo)
         }
       },
+    # Dynamo SuccessRequest widget
       {
         "type" : "metric",
         "x" : 6,
@@ -295,6 +305,7 @@ locals {
           "region" : "ap-southeast-2"
         }
       },
+    # Dynamo Read Units widget
       {
         "type" : "metric",
         "x" : 12,
@@ -314,6 +325,7 @@ locals {
           "region" : "ap-southeast-2"
         }
       },
+    # Dynamo Write Units widget
       {
         "type" : "metric",
         "x" : 18,
@@ -338,6 +350,7 @@ locals {
 
   lambda_y_coord = local.dynamo_y_coord + length(local.dynamo_list) * 6
   lambda_widgets_text = length(local.lambda_list) > 0 ? [
+    # Lambda Text widget
     {
       "height" : 6,
       "width" : 6,
@@ -349,7 +362,7 @@ locals {
       }
     }
   ] : []
-
+  # Lambda Durations widget
   lambda_widgets_metric_1 = length(local.lambda_list) > 0 ? [
     {
       "height" : 6,
@@ -373,7 +386,7 @@ locals {
       }
     }
   ] : []
-
+  # Lambda Executions widget
   lambda_widgets_metric_2 = length(local.lambda_list) > 0 ? [
     {
       "height" : 6,

@@ -5,6 +5,7 @@ locals {
 
   lambda_detail_widgets = flatten([
     for idx, lambda_obj in local.lambda_list : [
+    # Lambda Text widget
       {
         "height" : 2,
         "width" : 6,
@@ -15,6 +16,7 @@ locals {
           "markdown" : format("## %s \n", lambda_obj.lambda)
         }
       },
+    # Lambda Errors widget
       {
         "height" : 3,
         "width" : 6,
@@ -32,6 +34,7 @@ locals {
           "stat" : "Sum"
         }
       },
+    # Lambda Throttles widget
       {
         "height" : 3,
         "width" : 6,
@@ -49,6 +52,7 @@ locals {
           "period" : 300
         }
       },
+    # Lambda Duration widget
       {
         "height" : 8,
         "width" : 9,
@@ -74,6 +78,7 @@ locals {
           }
         }
       },
+    # Lambda Invocations widget
       {
         "height" : 8,
         "width" : 9,
