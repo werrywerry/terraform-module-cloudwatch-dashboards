@@ -302,7 +302,7 @@ locals {
         "width" : 6,
         "height" : 6,
         "properties" : {
-          "title" : "ReadLatency"
+          "title" : "ConsumedReadCapacityUnits"
           "view" : "timeSeries",
           "stacked" : false,
           "annotations" : {
@@ -323,7 +323,7 @@ locals {
         "properties" : {
           "view" : "timeSeries",
           "stacked" : false,
-          "title" : "WriteLatency"
+          "title" : "ConsumedWriteCapacityUnits"
           "annotations" : {
             "alarms" : [
               for alarm in dynamo.alarms :
