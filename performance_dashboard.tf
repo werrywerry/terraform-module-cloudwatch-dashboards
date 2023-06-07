@@ -27,6 +27,26 @@ locals {
           "markdown" : format("# API Metrics\n\n## %s", api.api)
         }
       },
+      # API hit count widget
+      {
+        "height" : 3,
+        "width" : 6,
+        "y" : idx * 6 + 3,
+        "x" : 0,
+        "type" : "metric",
+        "properties" : {
+          "view" : "singleValue",
+          "metrics" : [
+            [
+              "AWS/ApiGateway",
+              "Count",
+              "ApiName",
+              api.api
+            ]
+          ],
+          "region" : "ap-southeast-2"
+        }
+      },
       # API 4xx and 5xx widget
       {
         "height" : 6,
@@ -61,7 +81,7 @@ locals {
           "stat" : "Sum"
         }
       },
-      # API Latency and Integration Latency widget
+      # API Latency widget
       {
         "height" : 6,
         "width" : 13,
@@ -78,27 +98,12 @@ locals {
           "view" : "timeSeries",
           "region" : "ap-southeast-2",
           "period" : 300,
-          "stat" : "Sum"
-        }
-      },
-      # API hit count widget
-      {
-        "height" : 3,
-        "width" : 6,
-        "y" : idx * 6 + 3,
-        "x" : 0,
-        "type" : "metric",
-        "properties" : {
-          "view" : "singleValue",
-          "metrics" : [
-            [
-              "AWS/ApiGateway",
-              "Count",
-              "ApiName",
-              api.api
-            ]
-          ],
-          "region" : "ap-southeast-2"
+          "stat" : "Sum",
+          "yAxis" : {
+            "left" : {
+              "min" : 0
+            }
+          }
         }
       }
     ]
@@ -106,7 +111,7 @@ locals {
 
   rds_y_coord = length(local.api_list) * 6
   rds_widgets = flatten([
-    # API text widget
+    # RDS text widget
     for idx, rds in local.rds_list : [
       {
         "height" : 6,
@@ -118,7 +123,7 @@ locals {
           "markdown" : format("# RDS Metrics\n\n## %s\n\n* Total IOPS Usage (Alarms at 80%% max)\n* CPU Utilization (Alarms at 80%%)\n* ReadLatency (Alarms at 1 second)\n* WriteLatency (Alarms at 1 second)\n* Free Storage Space (Alarms at 10%%)\n* Freeable Memory (Alarms at 20%%)\n* DiskQueueDepth\n", rds.rds)
         }
       },
-      # API IOPS widget
+      # RDS IOPS widget
       {
         "height" : 6,
         "width" : 9,
@@ -215,7 +220,12 @@ locals {
           }
           "view" : "timeSeries",
           "stacked" : false,
-          "type" : "chart"
+          "type" : "chart",
+          "yAxis" : {
+            "left" : {
+              "min" : 0,
+            }
+          }
         }
       },
     # RDS Storage widget
@@ -235,7 +245,12 @@ locals {
           }
           "view" : "timeSeries",
           "stacked" : false,
-          "type" : "chart"
+          "type" : "chart",
+          "yAxis" : {
+            "left" : {
+              "min" : 0,
+            }
+          }
         }
       },
     # RDS Disk Queue widget
