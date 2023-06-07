@@ -140,7 +140,14 @@ locals {
           }
           "view" : "timeSeries",
           "stacked" : false,
-          "type" : "chart"
+          "type" : "chart",
+          "yAxis" : {
+            "left" : {
+              "min" : 0,
+            "label" : "TotalIOPS",
+            "showUnits" : false
+            }
+          }
         }
       },
     # RDS CPU widget
@@ -160,7 +167,12 @@ locals {
           }
           "view" : "timeSeries",
           "stacked" : false,
-          "type" : "chart"
+          "type" : "chart",
+          "yAxis" : {
+            "left" : {
+              "min" : 0,
+            }
+          }
         }
       },
     # RDS Read Latency widget
@@ -180,7 +192,12 @@ locals {
           }
           "view" : "timeSeries",
           "stacked" : false,
-          "type" : "chart"
+          "type" : "chart",
+          "yAxis" : {
+            "left" : {
+              "min" : 0,
+            }
+          }
         }
       },
     # RDS Write Latency widget
@@ -200,7 +217,12 @@ locals {
           }
           "view" : "timeSeries",
           "stacked" : false,
-          "type" : "chart"
+          "type" : "chart",
+          "yAxis" : {
+            "left" : {
+              "min" : 0,
+            }
+          }
         }
       },
     # RDS Memory widget
@@ -419,7 +441,7 @@ locals {
         "yAxis" : {
           "left" : {
             "label" : "Executions",
-            "showUnits" : true,
+            "showUnits" : false,
             "min" : 0
           }
         }
