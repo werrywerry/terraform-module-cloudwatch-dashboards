@@ -115,7 +115,7 @@ locals {
         "x" : 0,
         "type" : "text",
         "properties" : {
-          "markdown" : format("# RDS Metrics\n\n## %s\n\n* Total IOPS Usage (Alarms at 80%% max)\n* Free Storage Space (Alarms at 10%%)\n* Freeable Memory (Alarms at 20%%)\n* CPU Utilization (Alarms at 80%%)\n* DiskQueueDepth\n", rds.rds)
+          "markdown" : format("# RDS Metrics\n\n## %s\n\n* Total IOPS Usage (Alarms at 80%% max)\n* CPU Utilization (Alarms at 80%%)\n* ReadLatency (Alarms at 1 second)\n* WriteLatency (Alarms at 1 second)\n* Free Storage Space (Alarms at 10%%)\n* Freeable Memory (Alarms at 20%%)\n* DiskQueueDepth\n", rds.rds)
         }
       },
       # API IOPS widget
