@@ -78,17 +78,21 @@ locals {
           }
         }
       },
-    # Lambda Invocations widget
-      {
-        "height" : 8,
-        "width" : 9,
-        "y" : idx * local.widget_height,
-        "x" : 15,
-        "type" : "metric",
-        "properties" : {
-          "metrics" : [
-            ["AWS/Lambda", "Invocations", "FunctionName", lambda_obj.lambda, { "region" : "ap-southeast-2" }]
-          ],
+# Lambda Success-Rate widget
+{
+  "height" : 8,
+  "width" : 9,
+  "y" : idx * local.widget_height,
+  "x" : 15,
+  "type" : "metric",
+  "properties" : {
+    "title" : "Success Rate",
+    "annotations" : {
+      "alarms" : [
+        for alarm in lambda_obj.alarms :
+        alarm["success_rate_alarm_arn"] if contains(keys(alarm), "success_rate_alarm_arn")
+      ]
+    },
           "view" : "timeSeries",
           "stacked" : false,
           "region" : "ap-southeast-2",
