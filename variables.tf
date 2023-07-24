@@ -1,48 +1,31 @@
-variable "dashboard_name" {
-  type    = string
-  default = "terraform-test-dashboard"
+variable "env" {
+  type        = string
+  description = "Deployment environment"
 }
 
 variable "service_name" {
-  type    = string
-  default = "terraform-test-dashboard"
+  type        = string
+  description = "System or service name for which this dashboard is being created eg StaffService"
 }
 
 variable "resource_list" {
-  type = list(map(string))
-  default = [
-    {
-      "staff-service-v3" = "api"
-    },
-    {
-      "staff-service-datastore" = "rds"
-    },
-    {
-      "staff-personal-location-change-event-processor" = "lambda"
-    },
-    {
-      "staff-personal-change-event-processor-lambda" = "lambda"
-    },
-    {
-      "staff-service-staffassignment-request-handler-lambda" = "lambda"
-    },
-    {
-      "staff-service-staffpersonal-request-handler-lambda" = "lambda"
-    },
-    {
-      "staff-change-event-notification-lambda" = "lambda"
-    },
-    {
-      "arn:aws:cloudwatch:ap-southeast-2:318468042250:alarm:staff-service-datastore-IOPS" = "rds_alarm"
-    },
-    {
-      "arn:aws:cloudwatch:ap-southeast-2:318468042250:alarm:staff-service-datastore-CPUUtilization" = "rds_alarm"
-    },
-    {
-      "arn:aws:cloudwatch:ap-southeast-2:318468042250:alarm:staff-service-datastore-FreeableMemory" = "rds_alarm"
-    },
-    {
-      "arn:aws:cloudwatch:ap-southeast-2:318468042250:alarm:staff-service-datastore-FreeStorageSpace" = "rds_alarm"
-    }
-  ]
+  description = "List of AWS resources and their required alarm ARNs"
+  type = object({
+    apis = list(object({
+      api    = string
+      alarms = list(map(string))
+    }))
+    dynamos = list(object({
+      dynamo = string
+      alarms = list(map(string))
+    }))
+    lambdas = list(object({
+      lambda = string
+      alarms = list(map(string))
+    }))
+    rdss = list(object({
+      rds    = string
+      alarms = list(map(string))
+    }))
+  })
 }
